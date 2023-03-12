@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <TimerOne.h>
+// #include <TimerOne.h>
 #include <Wire.h>                       // For some strange reasons, Wire.h must be included here
 #include <DS1307new.h>
 
@@ -13,11 +13,28 @@ int hour, minute, second;
 
 int year, day;
 char month[3];
+char buffer[20];
+
+struct Horario {
+  int hora;
+  int minuto;
+  int segundo;
+  int duracion;
+};
+
+Horario horarios[] = {
+    { 14, 59, 0, 10 }, // Encender a las 10:30 y durar 10 segundos
+    { 15, 0, 0, 5 },  // Encender a las 14:45 y durar 5 segundos
+    // Agregar más horarios según sea necesario
+  };
 
 void timerIsr(void);
 int getMonthFromAbbreviation(char*);
+void ejecutarHorarios(Horario [], int);
 
 void setup() {
+  pinMode(13, OUTPUT);
+
   Serial.begin(115200); // Inicializar el puerto serie a 9600 baudios
 
   RTC.setRAM(0, (uint8_t *)&startAddr, sizeof(uint16_t));
@@ -54,13 +71,15 @@ void setup() {
   RTC.ctrl = 0x00;                      // 0x00=disable SQW pin, 0x10=1Hz,
                                         // 0x11=4096Hz, 0x12=8192Hz, 0x13=32768Hz
   RTC.setCTRL();
-
-
-  Timer1.initialize(1000000); // Configurar el temporizador para generar una interrupción cada segundo (1000000 microsegundos = 1 segundo)
-  Timer1.attachInterrupt(timerIsr); // Asignar la rutina de interrupción al temporizador
 }
 
 void loop() {
+  RTC.getTime();
+
+  int numHorarios = sizeof(horarios) / sizeof(horarios[0]);
+  ejecutarHorarios(horarios, numHorarios);
+
+  delay(200);
 }
 
 int getMonthFromAbbreviation(char monthAbbreviation[3]) {
@@ -74,84 +93,15 @@ int getMonthFromAbbreviation(char monthAbbreviation[3]) {
   return 0;  // Si no se encuentra el mes, se devuelve 0
 }
 
-void timerIsr() {
-  Serial.println("Hola, mundo!"); // Mostrar un saludo por el puerto serie
-
-  RTC.getTime();
-  if (RTC.hour < 10)                    // correct hour if necessary
-  {
-    Serial.print("0");
-    Serial.print(RTC.hour, DEC);
-  }
-  else
-  {
-    Serial.print(RTC.hour, DEC);
-  }
-  Serial.print(":");
-  if (RTC.minute < 10)                  // correct minute if necessary
-  {
-    Serial.print("0");
-    Serial.print(RTC.minute, DEC);
-  }
-  else
-  {
-    Serial.print(RTC.minute, DEC);
-  }
-  Serial.print(":");
-  if (RTC.second < 10)                  // correct second if necessary
-  {
-    Serial.print("0");
-    Serial.print(RTC.second, DEC);
-  }
-  else
-  {
-    Serial.print(RTC.second, DEC);
-  }
-  Serial.print(" ");
-  if (RTC.day < 10)                    // correct date if necessary
-  {
-    Serial.print("0");
-    Serial.print(RTC.day, DEC);
-  }
-  else
-  {
-    Serial.print(RTC.day, DEC);
-  }
-  Serial.print("-");
-  if (RTC.month < 10)                   // correct month if necessary
-  {
-    Serial.print("0");
-    Serial.print(RTC.month, DEC);
-  }
-  else
-  {
-    Serial.print(RTC.month, DEC);
-  }
-  Serial.print("-");
-  Serial.print(RTC.year, DEC);          // Year need not to be changed
-  Serial.println(" ");
-  switch (RTC.dow)                      // Friendly printout the weekday
-  {
-    case 1:
-      Serial.print("MON");
-      break;
-    case 2:
-      Serial.print("TUE");
-      break;
-    case 3:
-      Serial.print("WED");
-      break;
-    case 4:
-      Serial.print("THU");
-      break;
-    case 5:
-      Serial.print("FRI");
-      break;
-    case 6:
-      Serial.print("SAT");
-      break;
-    case 7:
-      Serial.print("SUN");
-      break;
+void ejecutarHorarios(Horario horarios[], int numHorarios) {
+  for (int i = 0; i < numHorarios; i++) {
+    Horario horario = horarios[i];
+    if (horario.hora == RTC.hour && horario.minuto == RTC.minute && horario.segundo == RTC.second) {
+      digitalWrite(13, HIGH);
+      sprintf(buffer, "%02d:%02d:%02d %02d-%02d-%d", RTC.hour, RTC.minute, RTC.second, RTC.day, RTC.month, RTC.year);
+      Serial.println(buffer);
+      delay(horario.duracion * 1000); // Convertir segundos en milisegundos
+      digitalWrite(13, LOW);
+    }
   }
 }
