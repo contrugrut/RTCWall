@@ -21,6 +21,19 @@ int hour, minute, second;
 int year, day;
 char month[3];
 
+struct Horario {
+  byte hora;
+  byte minuto;
+};
+
+Horario horarios[] = {
+  {8, 0},
+  {12, 30},
+  {17, 45}
+};
+
+
+
 int getMonthFromAbbreviation(char*);
 
 // *********************************************
@@ -93,6 +106,23 @@ void setup() {
 // *********************************************
 void loop()
 {
+
+
+
+
+
+byte hora_actual = RTC.hour;
+  byte minuto_actual = RTC.minute;
+  
+  for (unsigned int i = 0; i < sizeof(horarios)/sizeof(horarios[0]); i++) {
+    if (horarios[i].hora == hora_actual && horarios[i].minuto == minuto_actual) {
+      digitalWrite(LED_BUILTIN, HIGH); // encender LED
+      break;
+    }
+  }
+
+
+
 
   RTC.getTime();
   if (RTC.hour < 10)                    // correct hour if necessary
