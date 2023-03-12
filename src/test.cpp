@@ -225,3 +225,19 @@ int getMonthFromAbbreviation(char monthAbbreviation[3]) {
   }
   return 0;  // Si no se encuentra el mes, se devuelve 0
 }
+
+
+
+/* 
+
+1) 5:00- 20 min
+2) 10:00 - 10 min
+3) 3:00 pm - 10 min 
+4) 6:00 pm - 10 min 
+
+
+
+
+
+
+*/
