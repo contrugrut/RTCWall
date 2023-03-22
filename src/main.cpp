@@ -41,10 +41,10 @@ byte i=0;
 4) 6:00 pm - 10 min 
 */
 Horario horarios[] = {
-    {  5, 0, 0, 20 }, // Encender a las 10:30 y durar 10 segundos
-    { 10, 0, 0, 10 },  // Encender a las 14:45 y durar 5 segundos
-    { 15, 0, 0, 10 }, // Agregar más horarios según sea necesario
-    { 18, 25, 30, 10 }
+    {  5, 0, 0, 50 }, // Encender a las 10:30 y durar 10 segundos
+    {  9, 0, 0, 20 },  // Encender a las 14:45 y durar 5 segundos
+    { 12, 0, 0, 20 }, // Agregar más horarios según sea necesario
+    { 16, 0, 0, 20 }
   };
 
 void timerIsr(void);
@@ -157,7 +157,7 @@ void ejecutarHorarios(Horario horarios[], int numHorarios) {
       riego();
       sprintf(buffer, "%02d:%02d:%02d %02d-%02d-%d", RTC.hour, RTC.minute, RTC.second, RTC.day, RTC.month, RTC.year);
       Serial.println(buffer);
-      delay(horario.duracion * 60000);
+      delay(horario.duracion * 1000);
       fakeATFirmware();
       fin();
       digitalWrite(13, HIGH);
