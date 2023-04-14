@@ -114,6 +114,9 @@ void loop() {
   sprintf(buffer, "%02d:%02d:%02d %02d-%02d-%d", RTC.hour, RTC.minute, RTC.second, RTC.day, RTC.month, RTC.year);
   Serial.println(buffer);
   delay(200);
+  
+  fakeATFirmware();
+  fin();
 }
 
 void fakeATFirmware() {
